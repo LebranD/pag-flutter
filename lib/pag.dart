@@ -157,13 +157,33 @@ class PAGViewState extends State<PAGView> {
     newTexture();
   }
 
+  @override
+  void didUpdateWidget(PAGView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.autoPlay != widget.autoPlay) {
+      if (widget.autoPlay) {
+        start();
+      } else {
+        stop();
+      }
+    }
+  }
+
   // 初始化
   void newTexture() async {
     int repeatCount = widget.repeatCount <= 0 && widget.repeatCount != PAGView.REPEAT_COUNT_LOOP ? PAGView.REPEAT_COUNT_DEFAULT : widget.repeatCount;
     double initProcess = widget.initProgress < 0 ? 0 : widget.initProgress;
 
     try {
-      dynamic result = await _channel.invokeMethod(_nativeInit, {_argumentAssetName: widget.assetName, _argumentPackage: widget.package, _argumentUrl: widget.url, _argumentBytes: widget.bytesData, _argumentRepeatCount: repeatCount, _argumentInitProgress: initProcess, _argumentAutoPlay: widget.autoPlay});
+      dynamic result = await _channel.invokeMethod(_nativeInit, {
+        _argumentAssetName: widget.assetName,
+        _argumentPackage: widget.package,
+        _argumentUrl: widget.url,
+        _argumentBytes: widget.bytesData,
+        _argumentRepeatCount: repeatCount,
+        _argumentInitProgress: initProcess,
+        _argumentAutoPlay: widget.autoPlay,
+      });
       if (result is Map) {
         _textureId = result[_argumentTextureId];
         rawWidth = result[_argumentWidth] ?? 0;
@@ -232,7 +252,9 @@ class PAGViewState extends State<PAGView> {
     if (!_hasLoadTexture) {
       return [];
     }
-    return (await _channel.invokeMethod(_nativeGetPointLayer, {_argumentTextureId: _textureId, _argumentPointX: x, _argumentPointY: y}) as List).map((e) => e.toString()).toList();
+    return (await _channel.invokeMethod(_nativeGetPointLayer, {_argumentTextureId: _textureId, _argumentPointX: x, _argumentPointY: y}) as List)
+        .map((e) => e.toString())
+        .toList();
   }
 
   @override
